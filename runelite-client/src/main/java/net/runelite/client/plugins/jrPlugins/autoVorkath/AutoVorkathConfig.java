@@ -46,10 +46,30 @@ public interface AutoVorkathConfig extends Config {
     }
 
     @ConfigItem(
+            keyName = "AutoBank",
+            name = "Automatically bank",
+            description = "Automatically banks",
+            position = 4
+    )
+    default boolean AUTOBANK() {
+        return false;
+    }
+
+    @ConfigItem(
+            keyName = "portalNexus",
+            name = "Use Portal Nexus",
+            description = "Use portal nexus to bank",
+            position = 5
+    )
+    default boolean PORTALNEXUS() {
+        return false;
+    }
+
+    @ConfigItem(
             keyName = "rigour",
             name = "Rigour",
             description = "Activate Rigour?",
-            position = 4
+            position = 6
     )
     default boolean ACTIVATERIGOUR() { return true; }
 
@@ -57,7 +77,21 @@ public interface AutoVorkathConfig extends Config {
             keyName = "rangePotion",
             name = "Ranging Potion",
             description = "What Ranging potion to use?",
-            position = 5
+            position = 7
     )
     default RANGE_POTION RANGEPOTION() { return RANGE_POTION.DIVINE_RANGING_POTION; }
+    @ConfigItem(
+            keyName = "Min Health",
+            name = "Min Health",
+            description = "Treshold to eat food",
+            position = 8
+    )
+    default int MINHEALTH() { return 55; }
+    @ConfigItem(
+            keyName = "Min Prayer",
+            name = "Min Prayer",
+            description = "Treshold to drink prayer potion",
+            position = 9
+    )
+    default int MINPRAY() { return 20; }
 }

@@ -115,7 +115,7 @@ public class Rs2Npc {
 
     public static NPC[] getAttackableNpcs(String name) {
         List<NPC> npcs = Microbot.getClient().getNpcs().stream()
-                .filter((npc) -> npc.getCombatLevel() > 0 && !npc.isDead() && npc.getName().toLowerCase().equals(name))
+                .filter((npc) -> npc.getCombatLevel() > 0 && !npc.isDead() && npc.getName().equalsIgnoreCase(name))
                 .sorted(Comparator.comparingInt(value -> value.getLocalLocation().distanceTo(Microbot.getClient().getLocalPlayer().getLocalLocation())))
                 .collect(Collectors.toList());
 
@@ -124,7 +124,7 @@ public class Rs2Npc {
 
     public static NPC[] getPestControlPortals() {
         List<NPC> npcs = Microbot.getClient().getNpcs().stream()
-                .filter((npc) -> !npc.isDead() && npc.getHealthRatio() > 0 && npc.getName().toLowerCase().equals("portal"))
+                .filter((npc) -> !npc.isDead() && npc.getHealthRatio() > 0 && npc.getName().equalsIgnoreCase("portal"))
                 .sorted(Comparator.comparingInt(value -> value.getLocalLocation().distanceTo(Microbot.getClient().getLocalPlayer().getLocalLocation())))
                 .collect(Collectors.toList());
 
@@ -138,7 +138,7 @@ public class Rs2Npc {
                 return null;
             else
                 return npcs.stream()
-                        .filter(x -> x != null && x.getName().toLowerCase().equalsIgnoreCase(name.toLowerCase()))
+                        .filter(x -> x != null && x.getName().equalsIgnoreCase(name))
                         .sorted(Comparator.comparingInt(value -> value.getLocalLocation().distanceTo(Microbot.getClient().getLocalPlayer().getLocalLocation())))
                         .findAny().orElse(null);
         });
@@ -146,9 +146,9 @@ public class Rs2Npc {
 
     public static List<NPC> getNpcs(String name) {
         List<NPC> npcs = Microbot.getClientThread().runOnClientThread(() -> Microbot.getClient().getNpcs().stream()
-                .filter(x -> x != null && x.getName().toLowerCase().equalsIgnoreCase(name.toLowerCase()))
+                .filter(x -> x != null && x.getName().equalsIgnoreCase(name)))
                 .sorted(Comparator.comparingInt(value -> value.getLocalLocation().distanceTo(Microbot.getClient().getLocalPlayer().getLocalLocation())))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
 
         return npcs;
     }
@@ -161,6 +161,19 @@ public class Rs2Npc {
             else
                 return npcs.stream()
                         .filter(x -> x != null && x.getId() == id)
+                        .sorted(Comparator.comparingInt(value -> value.getLocalLocation().distanceTo(Microbot.getClient().getLocalPlayer().getLocalLocation())))
+                        .findFirst().orElse(null);
+        });
+    }
+
+    public static NPC getNpc(int[] ids) {
+        return Microbot.getClientThread().runOnClientThread(() -> {
+            List<NPC> npcs = Arrays.stream(getNpcs()).collect(Collectors.toList());
+            if (npcs.isEmpty())
+                return null;
+            else
+                return npcs.stream()
+                        .filter(x -> x != null && Arrays.stream(ids).anyMatch(c -> c == x.getId()))
                         .sorted(Comparator.comparingInt(value -> value.getLocalLocation().distanceTo(Microbot.getClient().getLocalPlayer().getLocalLocation())))
                         .findFirst().orElse(null);
         });
@@ -233,13 +246,13 @@ public class Rs2Npc {
         menuEntry.setTarget("<col=ffff00>" + npcInteraction.getName() + "<col=ff00>  (level-" + npcInteraction.getCombatLevel() + ")");
         menuEntry.setParam1(0);
         menuEntry.setOption(Rs2Npc.npcAction);
-        if (npcAction.toLowerCase().equals("talk-to")) {
+        if (npcAction.equalsIgnoreCase("talk-to")) {
             menuEntry.setType(MenuAction.NPC_FIRST_OPTION);
-        } else if (npcAction.toLowerCase().equals("attack")) {
+        } else if (npcAction.equalsIgnoreCase("attack")) {
             menuEntry.setType(MenuAction.NPC_SECOND_OPTION);
-        } else if (npcAction.toLowerCase().equals("pickpocket") || npcAction.toLowerCase().equals("bank") || npcAction.toLowerCase().equals("dream")) {
+        } else if (npcAction.equalsIgnoreCase("pickpocket") || npcAction.equalsIgnoreCase("bank") || npcAction.equalsIgnoreCase("dream") || npcAction.equalsIgnoreCase("ungael")) {
             menuEntry.setType(MenuAction.NPC_THIRD_OPTION);
-        } else if (npcAction.toLowerCase().equals("collect")) {
+        } else if (npcAction.equalsIgnoreCase("collect")) {
             menuEntry.setType(MenuAction.NPC_FOURTH_OPTION);
         } else {
             menuEntry.setType(MenuAction.NPC_FIRST_OPTION);

@@ -109,13 +109,7 @@ public class Walker {
     }
 
     public void walkFastCanvas(LocalPoint localPoint) {
-//        WorldPoint worldPoint = WorldPoint.fromRegion(Microbot.getClient().getLocalPlayer().getWorldLocation().getRegionID(),
-//                0,
-//                54,
-//                Microbot.getClient().getPlane());
-//        LocalPoint localPoint1 = LocalPoint.fromWorld(Microbot.getClient(), worldPoint);
         Point point = Perspective.localToCanvas(Microbot.getClient(), localPoint.getX(), localPoint.getY() - 128, Microbot.getClient().getPlane());
-
         travelToCanvasPoint = point;
         System.out.println(point);
         Microbot.getMouse().clickFast(1, 1);
@@ -157,16 +151,12 @@ public class Walker {
     }
 
     public boolean walkTo(WorldPoint target, boolean useTransport) {
-        pathfinder = null;
         WorldPoint start = WorldPoint.fromLocalInstance(Microbot.getClient(), Microbot.getClient().getLocalPlayer().getLocalLocation());
-        if (pathfinder != null) {
-            start = pathfinder.getStart();
-        }
         pathfinder = new Pathfinder(pathfinderConfig, start, target, useTransport, false);
         currentDestination = null;
         ignoreTransport = new ArrayList<>();
         pathOrigin = new ArrayList<>();
-        sleepUntilOnClientThread(() -> pathfinder.isDone(), 60000);
+        //sleepUntilOnClientThread(() -> pathfinder.isDone(), 60000);
         return false;
     }
 

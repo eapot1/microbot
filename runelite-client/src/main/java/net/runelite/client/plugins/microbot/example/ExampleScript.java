@@ -1,7 +1,5 @@
 package net.runelite.client.plugins.microbot.example;
 
-import net.runelite.api.GameObject;
-import net.runelite.api.ObjectID;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
@@ -11,6 +9,7 @@ import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.grounditem.Rs2GroundItem;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 
@@ -25,8 +24,18 @@ boolean reachedEndLine = false;
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             if (!super.run()) return;
             try {
-       //         MicrobotInventorySetup.loadEquipment("test");
-        //        MicrobotInventorySetup.loadInventory("test");
+                System.out.println(Microbot.getClient().getLocalPlayer().getLocalLocation().equals(new LocalPoint(6208, 6976)));
+              //  Rs2Player.hasAntiVenomActive();
+                //Rs2Bank.walkToBank();
+//                boolean hasBankNearby = Rs2Bank.openBank();
+//                if (!hasBankNearby && Rs2Player.isInHouse()) {
+//                    Rs2POH.usePortalNexus();
+//                    return;
+//                } else if (!hasBankNearby && !Rs2Player.isInHouse()) {
+//                    Rs2Bank.walkToBank();
+//                }
+            //    MicrobotInventorySetup.loadEquipment("test");
+        //MicrobotInventorySetup.loadInventory("test");
 //                Rs2Bank.withdrawAndEquipFast(ItemID.VOID_KNIGHT_GLOVES);
 //                Rs2Bank.withdrawAndEquipFast(ItemID.VOID_KNIGHT_ROBE);
 //                Rs2Bank.withdrawAndEquipFast(ItemID.VOID_KNIGHT_TOP);
@@ -47,7 +56,7 @@ boolean reachedEndLine = false;
 //                Rs2Bank.withdrawFast(ItemID.SLAYERS_STAFF);
 //                Rs2Bank.withdrawFast(ItemID.PRAYER_POTION4, 2);
 //                Rs2Bank.withdrawFast(ItemID.COOKED_KARAMBWAN, 4);
-//                Rs2Bank.withdrawAllFast(ItemID.MANTA_RAY);
+//                Rs2Bank.withdrawAllFast(ItemID.COINS_995);
 
                 //Rs2Bank.widgetId = 786445;
                 //Rs2Bank.itemId = ItemID.ECTOTOKEN;
@@ -58,47 +67,52 @@ boolean reachedEndLine = false;
 //                    System.out.println(inventorySetupsItem.getName());
 //                }
 
-                if (Rs2GameObject.findObjectById(ObjectID.ACID_POOL_32000) != null) {
-                   // toggleRunEnergy(false);
-                    if (position1 == null) {
-                        for (int i = 0; i < 4; i++) {
-                            int x = i * 128;
-                            GameObject gameObject = Rs2GameObject.getGameObject(new LocalPoint(5824 + x, 7104));
 
-                            if (gameObject == null) {
-                                position1 = new LocalPoint(5824 + x, 6976);
-                            }
+//                if (Rs2GameObject.findObjectById(ObjectID.ACID_POOL_32000) != null) {
+//                   // toggleRunEnergy(false);
+//                    if (position1 == null) {
+//                        for (int i = 0; i < 4; i++) {
+//                            int x = i * 128;
+//                            GameObject gameObject = Rs2GameObject.getGameObject(new LocalPoint(5824 + x, 7104));
+//
+//                            if (gameObject == null) {
+//                                position1 = new LocalPoint(5824 + x, 6976);
+//                            }
+//
+//                        }
+//                        return;
+//                    }
+//
+//                    System.out.println(position1);
+//
+//
+//                    if (Microbot.getClient().getLocalPlayer().getLocalLocation().getY() <= 7300 && !reachedEndLine) {
+//                        reachedEndLine = true;
+//                    }
+//
+//                    if (!reachedEndLine) {
+//                        Microbot.getWalker().walkFastCanvas(position1);
+//                        return;
+//                    }
+//
+//                    Microbot.getWalker().walkFastCanvas(position1);
+//                    sleep(500);
+//                    Rs2Npc.interact("vorkath", "attack");
+//                    return;
+//                }
+//                position1 = null;
+//                reachedEndLine = false;
 
-                        }
-                        return;
-                    }
-
-                    System.out.println(position1);
-
-
-                    if (Microbot.getClient().getLocalPlayer().getLocalLocation().getY() <= 7300 && !reachedEndLine) {
-                        reachedEndLine = true;
-                    }
-
-                    if (!reachedEndLine) {
-                        Microbot.getWalker().walkFastCanvas(position1);
-                        return;
-                    }
-
-                    Microbot.getWalker().walkFastCanvas(position1);
-                    sleep(500);
-                    Rs2Npc.interact("vorkath", "attack");
-                }
 
                 //getParam0=828, getParam1=582
 
                 //getParam0=-5146, getParam1=-4228,
                 //getParam0=-5350, getParam1=-4235
-               // System.out.println(Arrays.toString(Microbot.getClient().getMenuEntries()));
+                System.out.println(Arrays.toString(Microbot.getClient().getMenuEntries()));
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
-        }, 0, 400, TimeUnit.MILLISECONDS);
+        }, 0, 1000, TimeUnit.MILLISECONDS);
         return true;
     }
 

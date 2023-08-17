@@ -15,14 +15,14 @@ import static net.runelite.client.plugins.microbot.util.Global.sleep;
 public class Rs2GameObject {
 
     public static TileObject objectToInteract = null;
-    public static String objectAction = null;
+    public static String objectAction = "";
 
     public static boolean interact(GameObject gameObject) {
         return clickObject(gameObject);
     }
 
     public static boolean interact(TileObject tileObject) {
-        return clickObject(tileObject, null);
+        return clickObject(tileObject, "");
     }
 
     public static boolean interact(TileObject tileObject, String action) {
@@ -428,6 +428,7 @@ public class Rs2GameObject {
         TileObject tileObject = null;
         for (int id :
                 ids) {
+            if (tileObject != null) break;
             tileObject = findObjectById(id);
         }
         return tileObject;
@@ -495,9 +496,6 @@ public class Rs2GameObject {
                 }
                 for (GameObject tileObject :
                         tile.getGameObjects()) {
-                    if (Arrays.stream(tile.getGameObjects()).anyMatch(c -> c!= null && c.getId() == 11797)) {
-                        System.out.println(tile.getGameObjects());
-                    }
                     if (tileObject != null
                             && tileObject.getSceneMinLocation().equals(tile.getSceneLocation()))
                         tileObjects.add(tileObject);
@@ -580,7 +578,7 @@ public class Rs2GameObject {
             sleep(100);
             objectToInteract = null;
             objectAction = null;
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
 
@@ -594,13 +592,13 @@ public class Rs2GameObject {
         if (((GameObject) objectToInteract).sizeX() > 1) {
             int offset = ((GameObject) objectToInteract).sizeX() / 2;
             menuEntry.setParam0(objectToInteract.getLocalLocation().getSceneX() - offset);
-        }  else {
+        } else {
             menuEntry.setParam0(objectToInteract.getLocalLocation().getSceneX());
         }
         if (((GameObject) objectToInteract).sizeY() > 1) {
             int offset = ((GameObject) objectToInteract).sizeY() / 2;
             menuEntry.setParam1(objectToInteract.getLocalLocation().getSceneY() - offset);
-        }  else {
+        } else {
             menuEntry.setParam1(objectToInteract.getLocalLocation().getSceneY());
         }
 
@@ -610,7 +608,7 @@ public class Rs2GameObject {
             menuEntry.setType(MenuAction.GAME_OBJECT_SECOND_OPTION);
         } else if (objectAction.toLowerCase().equals("collect") || objectAction.toLowerCase().equals("store")) {
             menuEntry.setType(MenuAction.GAME_OBJECT_THIRD_OPTION);
-        }else if (objectAction.toLowerCase().equals("reset")) {
+        } else if (objectAction.toLowerCase().equals("reset")) {
             menuEntry.setType(MenuAction.GAME_OBJECT_SECOND_OPTION);
         } else {
             menuEntry.setType(MenuAction.GAME_OBJECT_FIRST_OPTION);

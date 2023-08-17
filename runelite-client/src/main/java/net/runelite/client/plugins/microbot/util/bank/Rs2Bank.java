@@ -127,7 +127,7 @@ public class Rs2Bank {
             if (isBankOpen()) return true;
             NPC npc = Rs2Npc.getNpc("banker");
             if (npc == null) return false;
-            boolean action = Rs2Menu.doAction("bank", npc.getCanvasTilePoly());
+            boolean action = Rs2Npc.interact(npc, "bank");
             if (action) {
                 sleepUntil(() -> isBankOpen() || Rs2Widget.hasWidget("Please enter your PIN"), 5000);
                 sleep(600, 1000);
@@ -433,7 +433,7 @@ public class Rs2Bank {
     public static void handleMenuSwapper(MenuEntry menuEntry) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         if (widgetId == 0 || itemWidget == null) return;
         int idx = itemWidget.getIndex();
-        menuEntry.getClass().getMethod("qk", int.class).invoke(menuEntry, itemId); //use the setItemId method through reflection
+        menuEntry.getClass().getMethod("sq", int.class).invoke(menuEntry, itemId); //use the setItemId method through reflection
         menuEntry.setOption("Withdraw-1");
         menuEntry.setIdentifier(identifier);
         menuEntry.setParam0(idx);

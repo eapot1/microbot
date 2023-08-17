@@ -73,6 +73,7 @@ public class Microbot {
         return Microbot.getClientThread().runOnClientThread(() -> getClient().getLocalPlayer().getPoseAnimation() != 813 && getClient().getLocalPlayer().getPoseAnimation() != 808);
     }
 
+    @Deprecated(since = "Use Rs2Player.isAnimating", forRemoval = true)
     public static boolean isAnimating() {
         return Microbot.getClientThread().runOnClientThread(() -> getClient().getLocalPlayer().getAnimation() != -1);
     }
