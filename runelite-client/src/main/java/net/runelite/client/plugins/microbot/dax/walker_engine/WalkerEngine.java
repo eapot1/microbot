@@ -3,10 +3,21 @@ package net.runelite.client.plugins.microbot.dax.walker_engine;
 import net.runelite.api.GameState;
 import net.runelite.api.Tile;
 import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.microbot.dax.walker_engine.bfs.BFS;
+import net.runelite.client.plugins.microbot.dax.walker_engine.interaction_handling.PathObjectHandler;
+import net.runelite.client.plugins.microbot.dax.walker_engine.local_pathfinding.PathAnalyzer;
+import net.runelite.client.plugins.microbot.dax.walker_engine.local_pathfinding.Reachable;
+import net.runelite.client.plugins.microbot.dax.walker_engine.navigation_utils.Charter;
+import net.runelite.client.plugins.microbot.dax.walker_engine.navigation_utils.NavigationSpecialCase;
+import net.runelite.client.plugins.microbot.dax.walker_engine.navigation_utils.ShipUtils;
+import net.runelite.client.plugins.microbot.dax.walker_engine.real_time_collision.CollisionDataCollector;
+import net.runelite.client.plugins.microbot.dax.walker_engine.real_time_collision.RealTimeCollisionTile;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+
+import static net.runelite.client.plugins.microbot.util.Global.sleep;
 
 public class WalkerEngine {
     private int attemptsForAction;
@@ -72,7 +83,7 @@ public class WalkerEngine {
                         System.out.println("Failed to exit ship via gangplank.");
                         failedAttempt();
                     }
-                    WaitFor.milliseconds(50);
+                    sleep(50);
                     continue;
                 }
 

@@ -6,12 +6,14 @@ import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
 import net.runelite.client.plugins.microbot.util.menu.NewMenuEntry;
 import net.runelite.client.plugins.microbot.util.reflection.Rs2Reflection;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 
@@ -110,7 +112,7 @@ public class Rs2GameObject {
         return findObject(objectName, true);
     }
 
-    @Deprecated(since="Use findObjectById", forRemoval = true)
+    @Deprecated(since = "Use findObjectById", forRemoval = true)
     public static ObjectComposition findObject(int id) {
         return Microbot.getClientThread().runOnClientThread(() -> Microbot.getClient().getObjectDefinition(id));
     }
@@ -238,30 +240,18 @@ public class Rs2GameObject {
         return null;
     }
 
-    private static List<DecorativeObject> getDecorationObjects() {
-        Scene scene = Microbot.getClient().getScene();
-        Tile[][][] tiles = scene.getTiles();
+    public static List<DecorativeObject> getDecorationObjects() {
+        List<Tile> tiles = getTiles();
 
-        if (tiles == null) return new ArrayList<>();
+        if (tiles.isEmpty()) return new ArrayList<>();
 
-        int z = Microbot.getClient().getPlane();
         List<DecorativeObject> tileObjects = new ArrayList<>();
-        for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
-            for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
-                Tile tile = tiles[z][x][y];
-
-                if (tile == null) {
-                    continue;
-                }
-
-                tileObjects.add(tile.getDecorativeObject());
-            }
+        for (Tile tile : tiles) {
+            tileObjects.add(tile.getDecorativeObject());
         }
-
-
-        return Arrays.stream(tileObjects.toArray(new DecorativeObject[tileObjects.size()]))
+        return tileObjects.stream()
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt(value -> value.getLocalLocation().distanceTo(Microbot.getClient().getLocalPlayer().getLocalLocation())))
+                .sorted(Comparator.comparingInt(tile -> tile.getWorldLocation().distanceTo(Microbot.getClient().getLocalPlayer().getWorldLocation())))
                 .collect(Collectors.toList());
     }
 
@@ -596,37 +586,6 @@ public class Rs2GameObject {
         return null;
     }
 
-    public static List<Tile> getTiles(int maxTileDistance) {
-        int maxDistance = Math.max(2400, maxTileDistance * 128);
-
-        Player player = Microbot.getClient().getLocalPlayer();
-        Scene scene = Microbot.getClient().getScene();
-        Tile[][][] tiles = scene.getTiles();
-
-        int z = Microbot.getClient().getPlane();
-        List<Tile> tileObjects = new ArrayList<>();
-        for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
-            for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
-                Tile tile = tiles[z][x][y];
-
-                if (tile == null) {
-                    continue;
-                }
-
-                if (player.getLocalLocation().distanceTo(tile.getLocalLocation()) <= maxDistance) {
-                    tileObjects.add(tile);
-                }
-
-            }
-        }
-
-        return tileObjects;
-    }
-
-    public static List<Tile> getTiles() {
-        return getTiles(2400);
-    }
-
 
     public static GameObject getGameObject(LocalPoint localPoint) {
         Scene scene = Microbot.getClient().getScene();
@@ -638,26 +597,42 @@ public class Rs2GameObject {
         return Arrays.stream(tile.getGameObjects()).filter(Objects::nonNull).findFirst().orElse(null);
     }
 
-    public static List<GameObject> getGameObjects(int id) {
+    private static List<Tile> getTiles() {
+        return getTiles(Constants.SCENE_SIZE);
+    }
+
+    private static List<Tile> getTiles(int sceneSize) {
+        List<Tile> validTiles = new ArrayList<>();
         Scene scene = Microbot.getClient().getScene();
         Tile[][][] tiles = scene.getTiles();
 
         if (tiles == null) return new ArrayList<>();
 
         int z = Microbot.getClient().getPlane();
-        List<GameObject> tileObjects = new ArrayList<>();
-        for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
-            for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
+        for (int x = 0; x < sceneSize; ++x) {
+            for (int y = 0; y < sceneSize; ++y) {
                 Tile tile = tiles[z][x][y];
 
                 if (tile == null) {
                     continue;
                 }
-                for (GameObject tileObject : tile.getGameObjects()) {
-                    if (tileObject != null
-                            && tileObject.getSceneMinLocation().equals(tile.getSceneLocation()) && tileObject.getId() == id)
-                        tileObjects.add(tileObject);
-                }
+                validTiles.add(tile);
+            }
+        }
+        return validTiles;
+    }
+
+    public static List<GameObject> getGameObjects(int id) {
+        List<Tile> tiles = getTiles();
+
+        if (tiles.isEmpty()) return new ArrayList<>();
+
+        List<GameObject> tileObjects = new ArrayList<>();
+        for (Tile tile : tiles) {
+            for (GameObject tileObject : tile.getGameObjects()) {
+                if (tileObject != null
+                        && tileObject.getSceneMinLocation().equals(tile.getSceneLocation()) && tileObject.getId() == id)
+                    tileObjects.add(tileObject);
             }
         }
 
@@ -667,26 +642,23 @@ public class Rs2GameObject {
                 .collect(Collectors.toList());
     }
 
-    public static List<GameObject> getGameObjects(String...objectNames) {
-        Scene scene = Microbot.getClient().getScene();
-        Tile[][][] tiles = scene.getTiles();
+    public static List<GameObject> getGameObjects(String... objectNames) {
+        return getGameObjects(Constants.SCENE_SIZE, objectNames);
+    }
 
-        if (tiles == null) return new ArrayList<>();
+    public static List<GameObject> getGameObjects(int sceneSize, String... objectNames) {
+        List<Tile> tiles = getTiles(sceneSize);
 
-        int z = Microbot.getClient().getPlane();
+        if (tiles.isEmpty()) return new ArrayList<>();
+
         List<GameObject> tileObjects = new ArrayList<>();
-        for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
-            for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
-                Tile tile = tiles[z][x][y];
-
-                if (tile == null) {
-                    continue;
-                }
-                for (GameObject tileObject : tile.getGameObjects()) {
-                    if (tileObject != null
-                            && tileObject.getSceneMinLocation().equals(tile.getSceneLocation()))
-                        tileObjects.add(tileObject);
-                }
+        for (Tile tile : tiles) {
+            for (GameObject tileObject : tile.getGameObjects()) {
+                if (tileObject == null) continue;
+                ObjectComposition objectComposition = Microbot.getClient().getObjectDefinition(tileObject.getId());
+                if (tileObject.getSceneMinLocation().equals(tile.getSceneLocation())
+                        && Arrays.stream(objectNames).anyMatch(obj -> obj.equalsIgnoreCase(objectComposition.getName())))
+                    tileObjects.add(tileObject);
             }
         }
 
@@ -697,25 +669,16 @@ public class Rs2GameObject {
     }
 
     public static List<GameObject> getGameObjects() {
-        Scene scene = Microbot.getClient().getScene();
-        Tile[][][] tiles = scene.getTiles();
+        List<Tile> tiles = getTiles();
 
-        if (tiles == null) return new ArrayList<>();
+        if (tiles.isEmpty()) return new ArrayList<>();
 
-        int z = Microbot.getClient().getPlane();
         List<GameObject> tileObjects = new ArrayList<>();
-        for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
-            for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
-                Tile tile = tiles[z][x][y];
-
-                if (tile == null) {
-                    continue;
-                }
-                for (GameObject tileObject : tile.getGameObjects()) {
-                    if (tileObject != null
-                            && tileObject.getSceneMinLocation().equals(tile.getSceneLocation()))
-                        tileObjects.add(tileObject);
-                }
+        for (Tile tile : tiles) {
+            for (GameObject tileObject : tile.getGameObjects()) {
+                if (tileObject != null
+                        && tileObject.getSceneMinLocation().equals(tile.getSceneLocation()))
+                    tileObjects.add(tileObject);
             }
         }
 
@@ -726,24 +689,17 @@ public class Rs2GameObject {
     }
 
     public static List<GameObject> getGameObjects(int distance, WorldPoint anchorPoint) {
-        Scene scene = Microbot.getClient().getScene();
-        Tile[][][] tiles = scene.getTiles();
+        List<Tile> tiles = getTiles();
 
-        int z = Microbot.getClient().getPlane();
+        if (tiles.isEmpty()) return new ArrayList<>();
+
         List<GameObject> tileObjects = new ArrayList<>();
-        for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
-            for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
-                Tile tile = tiles[z][x][y];
-
-                if (tile == null) {
-                    continue;
-                }
-                for (GameObject tileObject : tile.getGameObjects()) {
-                    if (tileObject != null
-                            && tileObject.getSceneMinLocation().equals(tile.getSceneLocation())
-                            && tileObject.getWorldLocation().distanceTo2D(anchorPoint) <= distance)
-                        tileObjects.add(tileObject);
-                }
+        for (Tile tile : tiles) {
+            for (GameObject tileObject : tile.getGameObjects()) {
+                if (tileObject != null
+                        && tileObject.getSceneMinLocation().equals(tile.getSceneLocation())
+                        && tileObject.getWorldLocation().distanceTo2D(anchorPoint) <= distance)
+                    tileObjects.add(tileObject);
             }
         }
 
@@ -754,23 +710,13 @@ public class Rs2GameObject {
     }
 
     public static List<GroundObject> getGroundObjects() {
-        Scene scene = Microbot.getClient().getScene();
-        Tile[][][] tiles = scene.getTiles();
+        List<Tile> tiles = getTiles();
 
-        if (tiles == null) return new ArrayList<>();
+        if (tiles.isEmpty()) return new ArrayList<>();
 
-        int z = Microbot.getClient().getPlane();
         List<GroundObject> tileObjects = new ArrayList<>();
-        for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
-            for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
-                Tile tile = tiles[z][x][y];
-
-                if (tile == null) {
-                    continue;
-                }
-
-                tileObjects.add(tile.getGroundObject());
-            }
+        for (Tile tile : tiles) {
+            tileObjects.add(tile.getGroundObject());
         }
 
         return tileObjects.stream()
@@ -780,26 +726,14 @@ public class Rs2GameObject {
     }
 
     public static List<WallObject> getWallObjects() {
-        Scene scene = Microbot.getClient().getScene();
-        Tile[][][] tiles = scene.getTiles();
+        List<Tile> tiles = getTiles();
 
-        if (tiles == null) return new ArrayList<>();
+        if (tiles.isEmpty()) return new ArrayList<>();
 
-        int z = Microbot.getClient().getPlane();
         List<WallObject> tileObjects = new ArrayList<>();
-        for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
-            for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
-                Tile tile = tiles[z][x][y];
-
-                if (tile == null) {
-                    continue;
-                }
-
-                tileObjects.add(tile.getWallObject());
-            }
+        for (Tile tile : tiles) {
+            tileObjects.add(tile.getWallObject());
         }
-
-
         return tileObjects.stream()
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparingInt(tile -> tile.getWorldLocation().distanceTo(Microbot.getClient().getLocalPlayer().getWorldLocation())))
@@ -881,7 +815,7 @@ public class Rs2GameObject {
                 Rs2Camera.turnTo(object);
             }
 
-            Microbot.doInvoke(new NewMenuEntry(param0, param1, menuAction.getId(), object.getId(),-1, objComp.getName()), new Rectangle(object.getCanvasTilePoly().getBounds()));
+            Microbot.doInvoke(new NewMenuEntry(param0, param1, menuAction.getId(), object.getId(), -1, objComp.getName()), new Rectangle(object.getCanvasTilePoly().getBounds()));
 
             //Rs2Reflection.invokeMenu(param0, param1, menuAction.getId(), object.getId(),-1, "", "", -1, -1);
 
@@ -904,5 +838,39 @@ public class Rs2GameObject {
                     .hasLineOfSightTo(Microbot.getClient(), Microbot.getClient().getLocalPlayer().getWorldLocation().toWorldArea());
         }
         return true;
+    }
+
+//    public static List<GameObject> get(GameObjectPredicate filter) {
+//        List<Tile> tiles = getTiles();
+//
+//        if (tiles.isEmpty()) return new ArrayList<>();
+//
+//        return tiles.stream().flatMap(x -> Arrays.stream(x.getGameObjects()).filter(filter)).collect(Collectors.toList());
+//    }
+
+
+    /**
+     * @param filter
+     * @return
+     */
+    public static List<Rs2GameObjectContainer> get(Predicate<Rs2GameObjectContainer> filter) {
+        List<Tile> tiles = getTiles();
+
+        if (tiles.isEmpty()) return new ArrayList<>();
+
+        return tiles.stream().flatMap(x -> Arrays
+                .stream(x.getGameObjects())
+                .map(g -> Microbot.getClientThread().runOnClientThread(() -> new Rs2GameObjectContainer(g, Microbot.getClient().getObjectDefinition(g.getId()))
+                ))
+                .filter(o -> o.objectComposition != null && o.objectComposition.getActions() != null && o.objectComposition.getActions().length > 0
+                        || o.objectComposition != null && o.objectComposition.getImpostor() != null
+                        && o.objectComposition.getImpostor().getActions() != null
+                        && o.objectComposition.getImpostor().getActions().length > 0)
+                .filter(filter)).collect(Collectors.toList());
+    }
+
+    public static boolean interact(ObjectComposition objectComposition) {
+        TileObject gameObject = get(objectComposition.getId()
+        return clickObject(gameObject);
     }
 }
