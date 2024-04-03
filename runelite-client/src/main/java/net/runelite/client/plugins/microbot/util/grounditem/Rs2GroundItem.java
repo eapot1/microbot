@@ -245,7 +245,7 @@ public class Rs2GroundItem {
     public static boolean loot(int itemId) {
         if (Rs2Inventory.isFull(itemId)) return false;
         RS2Item[] groundItems = Microbot.getClientThread().runOnClientThread(() ->
-                Rs2GroundItem.getAll(255)
+                Rs2GroundItem.getAll(128) // TODO rewrite this so it's more efficient => look at fps
         );
         for (RS2Item rs2Item : groundItems) {
             if (rs2Item.getItem().getId() == itemId) {

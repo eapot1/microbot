@@ -1,7 +1,9 @@
 package net.runelite.client.plugins.microbot.quest;
 
 import net.runelite.api.ItemComposition;
+import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
@@ -39,7 +41,7 @@ public class QuestScript extends Script {
 
     private QuestConfig config;
 
-
+    int loops = 0;
     public boolean run(QuestConfig config) {
         this.config = config;
 
@@ -49,16 +51,20 @@ public class QuestScript extends Script {
                 if (QuestHelperPlugin.getSelectedQuest() != null && !Microbot.getClientThread().runOnClientThread(() -> QuestHelperPlugin.getSelectedQuest().isCompleted())) {
                     Widget widget = Rs2Widget.findWidget("Start ");
                     if (Rs2Widget.hasWidget("select an option") || (widget != null &&
-                            Microbot.getClientThread().runOnClientThread( () -> widget.getParent().getId()) != 10616888)) {
+                            Microbot.getClientThread().runOnClientThread( () -> widget.getParent().getId()) != 10616888) && loops < 5) {
                         VirtualKeyboard.keyPress('1');
                         VirtualKeyboard.keyPress(KeyEvent.VK_SPACE);
+                        sleep(400, 600);
+                        loops++;
                         return;
                     }
 
-                    if (Rs2Widget.hasWidget("click here to continue")) {
-                        VirtualKeyboard.keyPress(KeyEvent.VK_SPACE);
-                        return;
-                    }
+//                    if (Rs2Widget.hasWidget("click here to continue") || Rs2Widget.getWidget(ComponentID.DIALOG_PLAYER_TEXT)  != null || Rs2Widget.getWidget(ComponentID.DIALOG_NPC_TEXT)  != null
+//                    || Rs2Widget.getWidget(217, 0) != null && !Microbot.getClientThread().runOnClientThread(() -> Rs2Widget.getWidget(217, 0).isHidden()) && loops < 5) {
+//                        VirtualKeyboard.keyPress(KeyEvent.VK_SPACE);
+//                        sleep(400, 600);
+//                        return;
+//                    }
 
                     boolean isInCutscene = Microbot.getVarbitValue(4606) > 0;
                     if (isInCutscene) {
@@ -159,8 +165,10 @@ public class QuestScript extends Script {
                         if (QuestHelperPlugin.getSelectedQuest().getCurrentStep() instanceof ConditionalStep) {
                             QuestStep conditionalStep = QuestHelperPlugin.getSelectedQuest().getCurrentStep().getActiveStep();
                             applyStep(conditionalStep);
+                            loops = 0;
                         } else if (QuestHelperPlugin.getSelectedQuest().getCurrentStep() instanceof NpcStep) {
                             applyNpcStep((NpcStep) QuestHelperPlugin.getSelectedQuest().getCurrentStep());
+                            loops = 0;
                         }
                     } else {
                         reset();

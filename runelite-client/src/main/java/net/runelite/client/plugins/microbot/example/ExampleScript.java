@@ -53,10 +53,8 @@ public class ExampleScript extends Script {
                  */
 
                 long startTime = System.currentTimeMillis();
-                Microbot.getWalkerForKotlin().walkFastLocal(
-                        LocalPoint.fromScene(48, 58)
-                );
-                Rs2Magic.castOn(MagicAction.CRUMBLE_UNDEAD, Rs2Npc.getNpc("guard"));
+               var result = MicrobotInventorySetup.doesInventoryMatch("test");
+                System.out.println(result);
                 long endTime = System.currentTimeMillis();
                 long totalTime = endTime - startTime;
                 System.out.println(totalTime);
