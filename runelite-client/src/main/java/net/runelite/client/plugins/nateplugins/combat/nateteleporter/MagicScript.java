@@ -35,16 +35,15 @@ public class MagicScript extends Script {
 
                 if (config.alchemy()) {
 
-                    Rs2Item item = Rs2Inventory.get(config.AlchItem());
+                    Rs2Item item = getNextItem(config.AlchItem());
                     if (item == null) {
                         Microbot.showMessage("Item: " + config.AlchItem() + " not found in your inventory.");
-                        sleep(5000);
+                        shutdown();
                         return;
                     }
 
-                    if (config.alchemy()) {
-                        Rs2Magic.alch(item);
-                    }
+
+                    Rs2Magic.alch(item);
                     sleepUntil(() -> Rs2Tab.getCurrentTab() == InterfaceTab.MAGIC);
                 }
 
@@ -84,8 +83,20 @@ public class MagicScript extends Script {
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
-        }, 0, 1000, TimeUnit.MILLISECONDS);
+        }, 0, 800, TimeUnit.MILLISECONDS);
         return true;
+    }
+
+    private Rs2Item getNextItem(String itemList) {
+        String[] items = itemList.split(",");
+        for (String item : items) {
+            Rs2Item rs2Item = Rs2Inventory.get(item);
+            if (rs2Item != null) {
+                return rs2Item;
+            }
+        }
+
+        return null;
     }
 
     @Override
