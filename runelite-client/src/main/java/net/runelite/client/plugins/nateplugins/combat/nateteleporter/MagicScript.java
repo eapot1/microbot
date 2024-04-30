@@ -87,6 +87,8 @@ public class MagicScript extends Script {
         return true;
     }
 
+    //Blood essence,med helm,warhammer,platelegs,chainbody,halberd,kite,full helm,battleaxe,mystic air,longsword,Rune sword,dagger,Combat bracelet,Onyx dragon bolts (e),battlestaff,Onyx bolts (e),d'hide body,platebody,Phoenix necklace,d'hide chaps,d'hide vambraces,Diamond bracelet,2h sword
+
     private Rs2Item getNextItem(String itemList) {
         return Microbot.getClientThread().runOnClientThread(() -> {
             // get inventory items that are in itemList
