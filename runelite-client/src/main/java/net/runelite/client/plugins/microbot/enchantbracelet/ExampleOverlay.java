@@ -1,6 +1,5 @@
-package net.runelite.client.plugins.microbot.example;
+package net.runelite.client.plugins.microbot.enchantbracelet;
 
-import net.runelite.api.Point;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -12,7 +11,7 @@ import java.awt.*;
 
 public class ExampleOverlay extends OverlayPanel {
     @Inject
-    ExampleOverlay(ExamplePlugin plugin)
+    ExampleOverlay(EnchantBraceletPlugin plugin)
     {
         super(plugin);
         setPosition(OverlayPosition.TOP_LEFT);

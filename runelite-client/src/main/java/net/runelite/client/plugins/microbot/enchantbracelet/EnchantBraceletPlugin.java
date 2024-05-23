@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.microbot.example;
+package net.runelite.client.plugins.microbot.enchantbracelet;
 
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
@@ -11,13 +11,13 @@ import javax.inject.Inject;
 import java.awt.*;
 
 @PluginDescriptor(
-        name = PluginDescriptor.Default + "Example",
-        description = "Microbot example plugin",
+        name = PluginDescriptor.Default + "Enchant bracelet",
+        description = "Enchant bracelet",
         tags = {"example", "microbot"},
         enabledByDefault = false
 )
 @Slf4j
-public class ExamplePlugin extends Plugin {
+public class EnchantBraceletPlugin extends Plugin {
     @Inject
     private ExampleConfig config;
     @Provides
