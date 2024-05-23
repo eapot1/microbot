@@ -109,7 +109,7 @@ public class braceletScript extends Script {
     public void useFurnace() {
         state = BraceletStates.doing;
 
-        GameObject furnace = Rs2GameObject.findObject("Furnace");
+        GameObject furnace = Rs2GameObject.get("Furnace");
 
         Rs2Player.toggleRunEnergy(true);
         Rs2GameObject.interact(furnace, "smelt");
