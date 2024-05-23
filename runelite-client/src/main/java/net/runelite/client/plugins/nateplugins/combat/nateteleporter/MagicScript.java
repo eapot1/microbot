@@ -1,5 +1,6 @@
 package net.runelite.client.plugins.nateplugins.combat.nateteleporter;
 
+import net.runelite.api.ItemID;
 import net.runelite.api.Skill;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.plugins.microbot.Microbot;
@@ -15,6 +16,7 @@ import net.runelite.client.plugins.microbot.util.tabs.Rs2Tab;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.nateplugins.combat.nateteleporter.enums.SPELLS;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 
@@ -83,22 +85,52 @@ public class MagicScript extends Script {
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
-        }, 0, 800, TimeUnit.MILLISECONDS);
+        }, 0, 500, TimeUnit.MILLISECONDS);
         return true;
     }
 
     //Blood essence,med helm,warhammer,platelegs,chainbody,halberd,kite,full helm,battleaxe,mystic air,longsword,Rune sword,dagger,Combat bracelet,Onyx dragon bolts (e),battlestaff,Onyx bolts (e),d'hide body,platebody,Phoenix necklace,d'hide chaps,d'hide vambraces,Diamond bracelet,2h sword
 
     private Rs2Item getNextItem(String itemList) {
-        String[] items = itemList.split(",");
-        for (String item : items) {
-            Rs2Item rs2Item = Rs2Inventory.get(item);
-            if (rs2Item != null) {
-                return rs2Item;
+        return Microbot.getClientThread().runOnClientThread(() -> {
+            // get inventory items that are in itemList
+            String[] items = itemList.split(",");
+            //make array lowercase
+            for (int i = 0; i < items.length; i++) {
+                items[i] = items[i].toLowerCase();
             }
-        }
+            //check if name is in the list, name can be a substring of the item name
+            // sorted by HA value
+            var rsItems = Rs2Inventory.all(item -> Arrays.stream(items).anyMatch(item.name.toLowerCase()::contains));
 
-        return null;
+
+            rsItems.sort((a, b) -> Microbot.getItemManager().getItemComposition(b.id).getHaPrice() - Microbot.getItemManager().getItemComposition(a.id).getHaPrice());
+
+            // log rsItems
+            for (Rs2Item rs2Item : rsItems) {
+                System.out.println(rs2Item.name);
+            }
+
+            if (!rsItems.isEmpty())
+                return rsItems.get(0);
+            else
+                return null;
+
+        });
+
+//        for (String item : items) {
+//            Rs2Item rs2Item = Rs2Inventory.get(item);
+//            if (rs2Item != null) {
+//                return rs2Item;
+//            }
+//        }
+//
+//        return null;
+    }
+
+    private int getHaPrice(int itemId) {
+
+        return Microbot.getClientThread().runOnClientThread(() -> Microbot.getItemManager().getItemComposition(itemId).getHaPrice());
     }
 
     @Override
