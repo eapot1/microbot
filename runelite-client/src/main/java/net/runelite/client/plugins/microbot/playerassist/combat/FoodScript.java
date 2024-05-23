@@ -8,6 +8,8 @@ import net.runelite.client.plugins.microbot.playerassist.PlayerAssistConfig;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
+import net.runelite.client.plugins.microbot.util.prayer.Rs2Prayer;
+import net.runelite.client.plugins.microbot.util.prayer.Rs2PrayerEnum;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +25,8 @@ public class FoodScript extends Script {
 
     String shieldName = "";
 
+    boolean usePrayer = false;
+
     public boolean run(PlayerAssistConfig config) {
         weaponname = "";
         bodyName = "";
@@ -37,9 +41,19 @@ public class FoodScript extends Script {
                 if (Rs2Inventory.hasItem("empty vial"))
                     Rs2Inventory.drop("empty vial");
                 double treshHold = (double) (Microbot.getClient().getBoostedSkillLevel(Skill.HITPOINTS) * 100) / Microbot.getClient().getRealSkillLevel(Skill.HITPOINTS);
+
                 if (Rs2Equipment.isWearingFullGuthan()) {
+                    if(config.emergencyPrayer() && !config.prayWhenHealing()) {
+                        if (treshHold < 20 && !Rs2Prayer.isPrayerActive(Rs2PrayerEnum.PROTECT_MELEE)) {
+                            Rs2Prayer.toggle(Rs2PrayerEnum.PROTECT_MELEE, true);
+                        }
+                        if (treshHold > 20 && Rs2Prayer.isPrayerActive(Rs2PrayerEnum.PROTECT_MELEE)) {
+                            Rs2Prayer.toggle(Rs2PrayerEnum.PROTECT_MELEE, false);
+                        }
+                    }
+
                     if (treshHold > 80) //only unequip guthans if we have more than 80% hp
-                        unEquipGuthans();
+                        unEquipGuthans(config);
                     return;
                 } else {
                     if (treshHold > 51) //return as long as we have more than 51% health and not guthan equipped
@@ -47,7 +61,7 @@ public class FoodScript extends Script {
                 }
                 List<Rs2Item> foods = Microbot.getClientThread().runOnClientThread(Rs2Inventory::getInventoryFood);
                 if (foods == null || foods.isEmpty()) {
-                    if (!equipFullGuthans()) {
+                    if (!equipFullGuthans(config)) {
                         Microbot.showMessage("No more food left & no guthans available. Please teleport");
                         sleep(5000);
                     }
@@ -65,7 +79,7 @@ public class FoodScript extends Script {
         return true;
     }
 
-    private void unEquipGuthans() {
+    private void unEquipGuthans(PlayerAssistConfig config) {
         if (Rs2Equipment.hasGuthanWeaponEquiped()  && !weaponname.isEmpty()) {
             Rs2Inventory.equip(weaponname);
             if (shieldName != null)
@@ -80,10 +94,13 @@ public class FoodScript extends Script {
         if (Rs2Equipment.hasGuthanHelmEquiped() && !helmName.isEmpty()) {
             Rs2Inventory.equip(helmName);
         }
+        if(config.prayWhenHealing()) {
+            Rs2Prayer.toggle(Rs2PrayerEnum.PROTECT_MELEE, false);
+        }
     }
 
-    private boolean equipFullGuthans() {
-        Rs2Item shield = get(EquipmentInventorySlot.SHIELD);
+    private boolean equipFullGuthans(PlayerAssistConfig config) {
+        Rs2Item shield = getEquippedItem(EquipmentInventorySlot.SHIELD);
         if (shield != null)
             shieldName = shield.name;
 
@@ -114,6 +131,9 @@ public class FoodScript extends Script {
             Rs2Item helm = Rs2Equipment.get(EquipmentInventorySlot.HEAD);
             helmName = helm != null ? helm.name : "";
             Rs2Inventory.equip(helmWidget.name);
+        }
+        if(config.prayWhenHealing()) {
+            Rs2Prayer.toggle(Rs2PrayerEnum.PROTECT_MELEE, true);
         }
         return true;
     }
