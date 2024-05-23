@@ -18,12 +18,12 @@ public class CombatPotionScript extends Script {
                 if (!Microbot.isLoggedIn()) return;
                 if (!super.run()) return;
                 if (!config.toggleCombatPotion() && !config.toggleRangingPotion()) return;
-                if (Microbot.getClient().getBoostedSkillLevel(Skill.ATTACK) - Microbot.getClient().getRealSkillLevel(Skill.ATTACK) > 5) return;
+                if (Microbot.getClient().getBoostedSkillLevel(Skill.STRENGTH) - Microbot.getClient().getRealSkillLevel(Skill.STRENGTH) > 3) return;
                 if (Microbot.getClient().getBoostedSkillLevel(Skill.RANGED) - Microbot.getClient().getRealSkillLevel(Skill.RANGED) > 5) return;
                 List<Rs2Item> rs2Items = Rs2Inventory.getPotions();
                 for (Rs2Item rs2Item: rs2Items
                 ) {
-                    if (rs2Item.name.contains("combat") || rs2Item.name.contains("ranging") || rs2Item.name.contains("bastion")) {
+                    if (rs2Item.name.toLowerCase().contains("combat") || rs2Item.name.contains("ranging") || rs2Item.name.contains("bastion")) {
                         Rs2Inventory.interact(rs2Item, "drink");
                         sleep(1800, 2400);
                         Rs2Inventory.dropAll("Vial");

@@ -163,6 +163,28 @@ public interface PlayerAssistConfig extends Config {
     {
         return false;
     }
+    @ConfigItem(
+            keyName = "pray when healing",
+            name = "Pray when healing",
+            description = "Pray when healing",
+            position = 4,
+            section = foodAndPotionsSection
+    )
+    default boolean prayWhenHealing()
+    {
+        return false;
+    }
+    @ConfigItem(
+            keyName = "emergency prayer",
+            name = "emergency prayer",
+            description = "emergency prayer",
+            position = 4,
+            section = foodAndPotionsSection
+    )
+    default boolean emergencyPrayer()
+    {
+        return false;
+    }
 
     @ConfigSection(
             name = "Loot",
