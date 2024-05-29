@@ -217,14 +217,14 @@ public class Rs2GroundItem {
                         Rs2Player.waitForAnimation();
                         boolean result = interact(rs2Item);
                         if (result) {
-                            sleepUntil(() -> invSize != Rs2Inventory.size());
+                            sleepUntil(() -> rs2Item.getTileItem() == null || invSize != Rs2Inventory.size(),3000);
                         }
                         return result;
                     }
                 }
                 boolean result = interact(rs2Item);
                 if (result) {
-                    sleepUntil(() -> invSize != Rs2Inventory.size());
+                    sleepUntil(() -> rs2Item.getTileItem() == null || invSize != Rs2Inventory.size(), 3000);
                 }
                 return result;
             }
