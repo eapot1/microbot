@@ -48,22 +48,22 @@ public class MWintertodtScript extends Script {
     public boolean run(MWintertodtConfig config) {
         this.config = config;
         state = State.BANKING;
+
+        if (config.axeInInventory()) {
+            if (!Rs2Inventory.hasItem("axe")) {
+                Microbot.showMessage("It seems that you selected axeInInventory option but no axe was found in your inventory.");
+                sleep(5000);
+                return false;
+            }
+            axe = Rs2Inventory.get("axe").name;
+        }
+
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
                 if (!Microbot.isLoggedIn()) return;
                 if (!super.run()) return;
 
                 long startTime = System.currentTimeMillis();
-
-                if (config.axeInInventory()) {
-                    if (!Rs2Inventory.hasItem("axe")) {
-                        Microbot.showMessage("It seems that you selected axeInInventory option but no axe was found in your inventory.");
-                        sleep(5000);
-                        return;
-                    }
-                    axe = Rs2Inventory.get("axe").name;
-                }
-
 
                 boolean wintertodtRespawning = Rs2Widget.hasWidget("returns in");
                 boolean isWintertodtAlive = Rs2Widget.hasWidget("Wintertodt's Energy");
@@ -343,6 +343,7 @@ public class MWintertodtScript extends Script {
     }
 
     private boolean handleBankLogic(MWintertodtConfig config) {
+        System.out.println("Handling bank logic");
         if (!Rs2Player.isFullHealth() && Rs2Inventory.hasItem(config.food().getName(), false)) {
             eatAt(99);
             return true;
