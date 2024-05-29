@@ -2,13 +2,18 @@ package net.runelite.client.plugins.microbot.shadeskiller;
 
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.NPC;
+import net.runelite.api.NpcID;
+import net.runelite.api.events.AnimationChanged;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import javax.inject.Inject;
 import java.awt.*;
+
 
 @PluginDescriptor(
         name = PluginDescriptor.Mocrosoft + "ShadesKiller",
@@ -20,6 +25,7 @@ import java.awt.*;
 public class ShadesKillerPlugin extends Plugin {
     @Inject
     private ShadesKillerConfig config;
+
     @Provides
     ShadesKillerConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(ShadesKillerConfig.class);
@@ -45,5 +51,19 @@ public class ShadesKillerPlugin extends Plugin {
     protected void shutDown() {
         shadesKillerScript.shutdown();
         overlayManager.remove(shadesKillerOverlay);
+    }
+
+    @Subscribe
+    public void onAnimationChanged(AnimationChanged e) {
+        if (!(e.getActor() instanceof NPC)) {
+            return;
+        }
+
+        final NPC npc = (NPC) e.getActor();
+        if (npc.getId() == NpcID.FIYR_SHADE && npc.getAnimation() == 1287) {
+            log.info("Shade died");
+            shadesKillerScript.shadeDied();
+        }
+
     }
 }

@@ -62,6 +62,16 @@ public interface ShadesKillerConfig extends Config {
     default boolean useCoffin() {
         return true;
     }
+    @ConfigItem(
+            keyName = "UsePotion",
+            name = "Use combat potion?",
+            description = "withdraw/use combat potion?",
+            position = 2,
+            section = generalSection
+    )
+    default boolean usePotion() {
+        return true;
+    }
 
     @ConfigItem(
             keyName = "Price of items to loot",

@@ -1,6 +1,8 @@
 package net.runelite.client.plugins.microbot.shadeskiller;
 
+import net.runelite.api.NPC;
 import net.runelite.api.Skill;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.shadeskiller.enums.State;
@@ -8,6 +10,7 @@ import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.combat.Rs2Combat;
 import net.runelite.client.plugins.microbot.util.grounditem.Rs2GroundItem;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
+import net.runelite.client.plugins.microbot.util.inventory.Rs2Item;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.math.Random;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
@@ -17,8 +20,11 @@ import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
 
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.runelite.client.plugins.microbot.shadeskiller.enums.State.USE_TELEPORT_TO_BANK;
 import static net.runelite.client.plugins.microbot.util.Global.sleepUntilTrue;
@@ -32,11 +38,26 @@ public class ShadesKillerScript extends Script {
     ShadesKillerConfig config;
     List<String> keys = Arrays.asList("Silver key crimson", "Silver key red", "Silver key brown", "Silver key black", "Silver key purple");
 
+    WorldPoint fightingPoint = new WorldPoint(3466, 9708, 0);
+
     boolean initScript = false;
     boolean resetActions = false;
 
     boolean coffinHasItems = true;
 
+    public boolean shadeDied = false;
+
+    boolean shadeDying = false;
+
+    void shadeDied() {
+        shadeDied = true;
+//        Microbot.getClientThread().runOnClientThread(() -> {
+//            shadeDying = true;
+//            sleep(1200, 1800);
+//            shadeDying = false;
+//            return null;
+//        });
+    }
 
     private void withdrawCoffin() {
         if (config.useCoffin()) {
@@ -80,6 +101,9 @@ public class ShadesKillerScript extends Script {
         Rs2Bank.withdrawOne(key, Random.random(100, 600));
         Rs2Bank.withdrawOne(config.teleportItemToShades(), Random.random(100, 600));
         Rs2Bank.withdrawOne(config.teleportItemToBank(), Random.random(100, 600));
+        if(config.usePotion()) {
+            Rs2Bank.withdrawOne("combat potion(4)", Random.random(100, 600));
+        }
         Rs2Bank.withdrawX(true, config.food().getName(), config.foodAmount(), true);
         withdrawCoffin();
         sleep(800, 1200);
@@ -113,6 +137,20 @@ public class ShadesKillerScript extends Script {
         Rs2Bank.depositAll("fiyr remains");
     }
 
+    private void drinkPotion() {
+        if (Microbot.getClient().getBoostedSkillLevel(Skill.ATTACK) - Microbot.getClient().getRealSkillLevel(Skill.ATTACK) > 5) return;
+        List<Rs2Item> rs2Items = Rs2Inventory.getPotions();
+        for (Rs2Item rs2Item: rs2Items
+        ) {
+            if (rs2Item.name.toLowerCase().contains("combat")) {
+                Rs2Inventory.interact(rs2Item, "drink");
+                sleep(1800, 2400);
+                Rs2Inventory.dropAll("Vial");
+                break;
+            }
+        }
+    }
+
     public boolean run(ShadesKillerConfig config) {
         this.config = config;
         initScript = true;
@@ -138,6 +176,11 @@ public class ShadesKillerScript extends Script {
 
                 if (Microbot.getClient().getBoostedSkillLevel(Skill.HITPOINTS) <= config.hpTreshhold() && Rs2Inventory.hasItem(config.teleportItemToBank())) {
                     state = USE_TELEPORT_TO_BANK;
+                }
+
+                if(shadeDied) {
+                    sleep(1000, 1300);
+                    shadeDied = false;
                 }
 
                 switch (state) {
@@ -200,15 +243,37 @@ public class ShadesKillerScript extends Script {
                         break;
                     case FIGHT_SHADES:
                         boolean isLooting = Rs2GroundItem.lootAtGePrice(config.priceOfItemsToLoot());
-                        if (isLooting) return;
+                        if (isLooting) {
+                            return;
+                        }
+                        if(config.usePotion()){
+                            drinkPotion();
+                        }
                         net.runelite.api.NPC npc = Rs2Npc.getNpcsForPlayer(config.SHADES().names.get(0)).stream().findFirst().orElse(null);
                         //if npc is attacking us, then attack back
                         if (npc != null && !Microbot.getClient().getLocalPlayer().isInteracting()) {
                             Rs2Npc.attack(npc);
+                            coffinHasItems = true;
+                            System.out.println("attacking back");
                             return;
                         }
                         //if no npc is attacking us, attack a new npc
-                        if (!Rs2Combat.inCombat() && !isLooting) {
+                        System.out.println("Rs2Combat.inCombat(): " + Rs2Combat.inCombat());
+                        if (!Rs2Combat.inCombat()) {
+                            if(!Rs2Npc.attack(config.SHADES().names) && Rs2Npc.getNpc("Fiyr Shadow") != null) {
+                                List<NPC> allNpcs = Rs2Npc.getNpcs().collect(Collectors.toList());
+
+                                System.out.println("allnpcs: " + allNpcs.size());
+
+                                List<NPC> npcs = Microbot.getClient().getNpcs().stream()
+                                        .filter(n -> Rs2Npc.hasLineOfSight(n) && n.getName().contains("Fiyr"))
+                                        .sorted(Comparator.comparingInt(value -> value.getLocalLocation().distanceTo(Microbot.getClient().getLocalPlayer().getLocalLocation())))
+                                        .collect(Collectors.toList());
+                                if(!npcs.isEmpty()) {
+                                    Rs2Npc.interact(npcs.get(0), "attack");
+                                }
+                                System.out.println("npcs: " + npcs.size());
+                            };
                             Rs2Npc.attack(config.SHADES().names);
                         }
                         Rs2Combat.setSpecState(true, config.specialAttack() * 10);
