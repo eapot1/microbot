@@ -100,7 +100,7 @@ public class FoodScript extends Script {
     }
 
     private boolean equipFullGuthans(PlayerAssistConfig config) {
-        Rs2Item shield = getEquippedItem(EquipmentInventorySlot.SHIELD);
+        Rs2Item shield = Rs2Equipment.get(EquipmentInventorySlot.SHIELD);
         if (shield != null)
             shieldName = shield.name;
 
