@@ -23,12 +23,15 @@ public class MiningScript extends Script {
 
                 if (Rs2Inventory.isFull()) {
                     if (config.hasPickaxeInventory()) {
-                        Rs2Inventory.dropAll(x -> x.slot > 0);
+                        Rs2Inventory.dropAll(x -> !x.name.toLowerCase().contains("pickaxe"));
                     } else {
                         Rs2Inventory.dropAll();
                     }
                     return;
                 }
+                //List<GameObject> rocks = Rs2GameObject.getGameObjectsWithinDistance(1);
+                //rocks.stream().filter(x -> x.getId() == 11364 || x.getId() == 11365).findFirst().ifPresent(Rs2GameObject::interact);
+                //Rs2GameObject.interact(rocks.get(0));
                 boolean result = Rs2GameObject.interact(config.ORE().getName());
                 if (result) {
                     Rs2Player.waitForAnimation();
