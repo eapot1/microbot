@@ -110,13 +110,13 @@ public class MotherloadMineScript extends Script {
                         status = MLMStatus.IDLE;
                         break;
                     case FIXING_WATERWHEEL:
-                        Rs2Walker.walkTo(new WorldPoint(3741, 5666, 0));
+                        //Rs2Walker.walkTo(new WorldPoint(3741, 5666, 0));
                         if (Rs2GameObject.interact(ObjectID.BROKEN_STRUT)) {
                             sleepUntil(() -> Microbot.isGainingExp);
                         }
                         break;
                     case DEPOSIT_HOPPER:
-                        Rs2Walker.walkTo(new WorldPoint(3748, 5674, 0));
+                        //Rs2Walker.walkTo(new WorldPoint(3748, 5674, 0));
                         if (Rs2GameObject.interact(ObjectID.HOPPER_26674)) {
                             sleepUntil(() -> !Rs2Inventory.isFull());
                             if (Microbot.getVarbitValue(Varbits.SACK_NUMBER) > 50) {
