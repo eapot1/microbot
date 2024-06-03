@@ -4,10 +4,7 @@ import com.google.inject.Provides;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.ObjectID;
-import net.runelite.api.TileObject;
+import net.runelite.api.*;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
@@ -19,6 +16,7 @@ import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.math.Random;
+import net.runelite.client.plugins.microbot.util.menu.NewMenuEntry;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
 import net.runelite.client.plugins.microbot.util.reflection.Rs2Reflection;
 import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
@@ -153,8 +151,13 @@ public class GildedAltarPlugin extends Plugin {
     }
 
     public void leaveHouse() {
-        Rs2Reflection.invokeMenu(-1, 7602207, CC_OP.getId(), 1, -1, "House Option", "", -1, -1);
-        Rs2Reflection.invokeMenu(-1, 24248341, CC_OP.getId(), 1, -1, "Leave House", "", -1, -1);
+        Rs2GameObject.interact(ObjectID.PORTAL_4525, "Enter");
+//        Microbot.doInvoke(new NewMenuEntry("House Option", "", 1, MenuAction.of(CC_OP.getId()),-1, 7602207, false),
+//                new Rectangle(1, 1, Microbot.getClient().getCanvasWidth(), Microbot.getClient().getCanvasHeight()));
+//        //Rs2Reflection.invokeMenu(-1, 7602207, CC_OP.getId(), 1, -1, "House Option", "", -1, -1);
+//        Microbot.doInvoke(new NewMenuEntry("Leave House", "", 1, MenuAction.of(CC_OP.getId()),-1, 24248341, false),
+//                new Rectangle(1, 1, Microbot.getClient().getCanvasWidth(), Microbot.getClient().getCanvasHeight()));
+        //Rs2Reflection.invokeMenu(-1, 24248341, CC_OP.getId(), 1, -1, "Leave House", "", -1, -1);
         setSkipTicks(4);
     }
 
@@ -191,8 +194,10 @@ public class GildedAltarPlugin extends Plugin {
         }
 
         if (playerHouse != null) {
-            Rs2Reflection.invokeMenu(playerHouse.getIndex(), 3407891, CC_OP.getId(), 1, -1,
-                    "", "", (int) playerHouse.getBounds().getCenterX(), (int) playerHouse.getBounds().getCenterY());
+            Microbot.doInvoke(new NewMenuEntry("", "", 1, MenuAction.of(CC_OP.getId()),playerHouse.getIndex(), 3407891, false),
+                    new Rectangle(1, 1, Microbot.getClient().getCanvasWidth(), Microbot.getClient().getCanvasHeight()));
+//            Rs2Reflection.invokeMenu(playerHouse.getIndex(), 3407891, CC_OP.getId(), 1, -1,
+//                    "", "", (int) playerHouse.getBounds().getCenterX(), (int) playerHouse.getBounds().getCenterY());
             setSkipTicks(2);
         }
     }
